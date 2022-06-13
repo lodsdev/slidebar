@@ -15,8 +15,8 @@ Create a new scrollbar
 ```lua
 scrollInput = createScrollInput(x, y, width, height, radiusBOrder, minValue, maxValue, circleScale, postGUI)
 ```
-Preview
--- No image
+Preview <br/>
+![Preview](https://github.com/LODSX/scrollbar/blob/main/preview.png)
 
 Destroy the scrollbar
 ```lua
