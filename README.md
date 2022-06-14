@@ -13,7 +13,7 @@ You need download the file ```scrollInput.lua``` and put it in your project, but
 # Functions
 Create a new scrollbar
 ```lua
-scrollInput = createScrollInput(x, y, width, height, radiusBOrder, minValue, maxValue, circleScale, postGUI)
+scrollInput = createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
 ```
 Preview <br/>
 ![Preview](https://github.com/LODSX/scrollbar/blob/main/preview.png)
