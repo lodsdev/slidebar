@@ -1,7 +1,7 @@
 --[[credits:
 
     author: LODS,
-    description: "A simple scroll input",
+    description: "A simple slidebar",
     version: "1.0"
 
 ]]--
