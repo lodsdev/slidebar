@@ -8,7 +8,7 @@ DX library that allows you to easily create slidebar.
 This is a simple library for create slidebars which allows easy creation of some resources
 
 # How to use
-You need download the file ```scrollInput.lua``` and put it in your project, but don't forget to load it in the meta.xml
+You need download the file ```slidebar.lua``` and put it in your project, but don't forget to load it in the meta.xml
 
 # Functions
 Create a new slidebar
