@@ -11,6 +11,7 @@ local tblInsert = table.insert
 local tblRemove = table.remove
 local strFormat = string.format
 local floor = math.floor
+local ceil = math.ceil
 local tblMax = table.maxn
 local max = math.max
 local min = math.min
@@ -144,7 +145,7 @@ function renderScrollInput()
             local cursorX = mx * screenW
 
             self.circlePos = max(self.x, min((self.x + self.width), cursorX))
-            self.scrollOffset = floor(max(self.minValue, min(self.maxValue, ((self.circlePos - self.x) / self.width) * 100)))
+            self.scrollOffset = ceil(max(self.minValue, min(self.maxValue, ((self.circlePos - self.x) / self.width) * 100)))
             
             if (self.scrollOffset < 0) then
                 self.scrollOffset = 0
