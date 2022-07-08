@@ -16,7 +16,7 @@ Create a new slidebar
 slidebar = createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
 ```
 Preview <br/>
-![Preview](https://github.com/LODSX/slidebar/blob/main/preview.png)
+![Preview](https://github.com/LODSX/slidebar/preview.png)
 
 Destroy the slidebar
 ```lua
