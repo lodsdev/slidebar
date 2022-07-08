@@ -19,7 +19,7 @@ local typeProgress, tickSmooth
 scrollInput.inputs = {}
 
 -- create the scroll input
-function createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
+function createSliderBar(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
     if (not (x or y)) then
         local input = (not x and "Error in argument #1. Define a position X") or (not y and "Error in argument #2. Define a position Y")
         warn(input)
@@ -89,9 +89,9 @@ function createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue
     tblInsert(scrollInput.inputs, datas)
 
     if (tblMax(scrollInput.inputs) == 1) then
-        addEventHandler('onClientRender', root, renderScrollInput, false, 'low-5')
-        addEventHandler('onClientClick', root, clickScrollInput, false, 'low-5')
-        addEventHandler('onClientKey', root, keyScrollInput, false, 'low-5')
+        addEventHandler('onClientRender', root, renderSlidebar, false, 'low-5')
+        addEventHandler('onClientClick', root, clickSliderBar, false, 'low-5')
+        addEventHandler('onClientKey', root, keySliderBar, false, 'low-5')
     end
     return datas
 end
@@ -112,7 +112,7 @@ local function dxDrawSVG(svg, x, y, width, height, color, postGUI)
 end
 
 -- render the scroll input
-function renderScrollInput()
+function renderSlidebar()
     if (not scrollInput.inputs or (not (#scrollInput.inputs > 0))) then
         return
     end
@@ -190,7 +190,7 @@ function renderScrollInput()
 end
 
 -- function to check if the cursor is on the element and change the position of circle
-function clickScrollInput(button, state)
+function clickSliderBar(button, state)
     if (not scrollInput.inputs or (not (#scrollInput.inputs > 0))) then
         return
     end
@@ -221,7 +221,7 @@ function clickScrollInput(button, state)
 end
 
 -- function to change the offset of slidebar on scroll
-function keyScrollInput(button, press)
+function keySliderBar(button, press)
     if (not scrollInput.inputs or (not (#scrollInput.inputs > 0))) then
         return
     end
@@ -259,9 +259,9 @@ function scrollInput:destroy()
     end
 
     if (not (tblMax(scrollInput.inputs) > 0)) then
-        removeEventHandler('onClientRender', root, renderScrollInput)
-        removeEventHandler('onClientClick', root, clickScrollInput)
-        removeEventHandler('onClientKey', root, keyScrollInput)
+        removeEventHandler('onClientRender', root, renderSlidebar)
+        removeEventHandler('onClientClick', root, clickSliderBar)
+        removeEventHandler('onClientKey', root, keySliderBar)
     end
 end
 
