@@ -198,7 +198,6 @@ function clickSliderBar(button, state)
             local mx, _ = getCursorPosition()
             local cursorX = mx * screenW
 
-
             if (inputHover.smoothScroll) then
                 inputHover.scrollOffset = floor(((inputHover.circlePos - inputHover.x) / inputHover.width) * 100, 0, 100)
                 local newCirclePos = clamp(cursorX, inputHover.x, (inputHover.x + inputHover.width))
@@ -230,9 +229,11 @@ function keySliderBar(button, press)
         if (button == 'mouse_wheel_up' and inputHover.scrollOffset < inputHover.maxValue) then
             inputHover.scrollOffset = inputHover.scrollOffset + 1
             inputHover:setScrollOffset(inputHover.scrollOffset)
+            inputHover.scroll_event(inputHover.scrollOffset)
         elseif (button == 'mouse_wheel_down' and inputHover.scrollOffset > inputHover.minValue) then
             inputHover.scrollOffset = inputHover.scrollOffset - 1
             inputHover:setScrollOffset(inputHover.scrollOffset)
+            inputHover.scroll_event(inputHover.scrollOffset)
         end
     end
 end
