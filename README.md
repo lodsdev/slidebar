@@ -13,27 +13,31 @@ You need download the file ```slidebar.lua``` and put it in your project, but do
 # Functions
 Create a new slidebar
 ```lua
-scrollInput = createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
+slidebar = createScrollInput(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
 ```
 Preview <br/>
 ![Preview](https://github.com/LODSX/slidebar/blob/main/preview.png)
 
 Destroy the slidebar
 ```lua
-scrollInput:destroy()
+slidebar:destroy()
+```
+Change a property of slide bar
+```lua
+slidebar:setProperty(property, value)
 ```
 
 Set a new offset
 ```lua
-scrollInput:setScrollOffset(value)
+slidebar:setScrollOffset(value)
 ```
 
 Get the scroll input
 ```lua
-scrollInput:onScroll()
+slidebar:onScroll()
 ```
 
 Get the output the scroll input
 ```lua
-sccrollInput:onScrollEnd()
+slidebar:onScrollEnd()
 ```
