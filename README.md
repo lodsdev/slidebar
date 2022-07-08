@@ -13,7 +13,7 @@ You need download the file ```slidebar.lua``` and put it in your project, but do
 # Functions
 Create a new slidebar
 ```lua
-slidebar = createSlidebar(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
+slidebar = createSlideBar(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
 ```
 Preview <br/>
 ![Preview](https://github.com/LODSX/slidebar/blob/main/preview_slidebar.png)
