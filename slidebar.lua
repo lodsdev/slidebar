@@ -184,8 +184,6 @@ function renderSlidebar()
                 end
             end
         end
-
-        dxDrawText(inspect(self.scrollOffset), 300, 300)
     end
 end
 
