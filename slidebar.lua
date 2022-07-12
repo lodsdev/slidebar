@@ -19,7 +19,7 @@ local typeProgress, tickSmooth
 scrollInput.inputs = {}
 
 -- create the scroll input
-function createSliderBar(x, y, width, height, radiusBorder, minValue, maxValue, circleScale, postGUI)
+function createSliderBar(x, y, width, height, indicatorScale, radiusBar, radiusIndicator, sizeStroke, minValue, maxValue, postGUI)
     if (not (x or y)) then
         local input = (not x and "Error in argument #1. Define a position X") or (not y and "Error in argument #2. Define a position Y")
         warn(input)
@@ -39,17 +39,16 @@ function createSliderBar(x, y, width, height, radiusBorder, minValue, maxValue, 
         warn("Error in argument #6. The max value don't can't be smaller than min value")
     end
 
-    radius = radiusBorder and height/2 or 0
-    circleScale = circleScale or 10
-    circleRadius = circleScale / 2 or 5
-
-    local newX, newY = circleScale / 2, circleScale / 2
+    radius = radiusBar and height / 2 or 0
+    indicatorScale = indicatorScale or 10
+    radiusIndicator = radiusIndicator or 0
+    sizeStroke = sizeStroke or 0
 
     local rawDataCircle = strFormat([[
         <svg width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="%s" cy="%s" r="%s" fill="#FFFFFF"/>
+            <rect rx="%s" width="%s" height="%s" fill="#FFFFFF" />
         </svg>
-    ]], circleScale, circleScale, newX, newY, circleRadius)
+    ]], indicatorScale, indicatorScale, radiusIndicator, indicatorScale, indicatorScale)
 
     local rawDataBar = strFormat([[
         <svg width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
@@ -63,19 +62,23 @@ function createSliderBar(x, y, width, height, radiusBorder, minValue, maxValue, 
         width = width,
         height = height,
         circlePos = 0,
+        circleY = 0,
         minValue = minValue or 0,
         maxValue = maxValue or 100,
-        intervalValue = maxValue - minValue,
         radius = radius,
-        circleScale = circleScale,
-        barColor = {255, 255, 255},
-        barColorHover = {255, 255},
+        indicatorScale = indicatorScale,
         bgBarColor = {255, 255, 255},
-        circleColor = {255, 255, 255},
+        barColor = {255, 255, 255},
+        barColorHover = {255, 255, 255},
+        indicatorColor = {255, 255, 255},
+        borderColor = {255, 255, 255},
+        sizeStroke = sizeStroke,
         postGUI = postGUI or false,
-        circle = svgCreate(circleScale, circleScale, rawDataCircle),
+        circle = svgCreate(indicatorScale, indicatorScale, rawDataCircle),
         barInput = svgCreate(width, height, rawDataBar),
         scrolling = false,
+        changeColorBar = false,
+        animationIndicator = false,
         scrollOffset = 100,
         -- Events Methods
         scroll_event = false,
@@ -84,6 +87,7 @@ function createSliderBar(x, y, width, height, radiusBorder, minValue, maxValue, 
         endedScrolling = true
     }
     datas.circlePos = (datas.x + datas.width)
+    datas.circleY = datas.y + ((datas.height / 2) - (datas.indicatorScale / 2))
 
     setmetatable(datas, {__index = scrollInput})
     tblInsert(scrollInput.inputs, datas)
@@ -120,10 +124,9 @@ function renderSlidebar()
     inputHover = nil
 
     for _, self in ipairs(scrollInput.inputs) do
-        local circleY = self.y + ((self.height / 2) - (self.circleScale / 2))
-        local barSelectedColor = self.barColor
         local value = ((self.circlePos - self.x) / self.width) * 100
-        local barValue = self.width/100 * value
+        local barValue = (self.width / 100) * value
+        local barSelectedColor = self.barColor
 
         if (typeProgress == 'in_progress') then
             local progress = (getTickCount()-tickSmooth)/250
@@ -139,8 +142,10 @@ function renderSlidebar()
             self.circlePos = newCirclePos
         end
 
-        if (isCursorOnElement(self.x, self.y, ((barValue + self.circleScale) * self.width) / 100, self.height) or isCursorOnElement(self.circlePos - (self.circleScale/2), circleY, self.circleScale, self.circleScale)) then
-            barSelectedColor = self.barColorHover
+        if (isCursorOnElement(self.x, self.y, ((barValue + self.indicatorScale) * self.width) / 100, self.height) or isCursorOnElement(self.circlePos - (self.indicatorScale/2), self.circleY, self.indicatorScale, self.indicatorScale)) then
+            if (self.changeColorBar) then
+                barSelectedColor = self.barColorHover
+            end
             inputHover = self
         end
 
@@ -154,22 +159,29 @@ function renderSlidebar()
 
             self.circlePos = clamp(cursorX, self.x, (self.x + self.width))
             self.scrollOffset = floor(clamp(((self.circlePos - self.x) / self.width) * 100, self.minValue, self.maxValue))
-            self.scrollOffset = clamp(self.scrollOffset, 0, 100)
 
             if (self.scroll_event) then
                 self.scroll_event(self.scrollOffset)
             end
 
-            barSelectedColor = self.barColorHover
+            if (self.changeColorBar) then
+                barSelectedColor = self.barColorHover
+            end
         end
 
-        dxDrawSVG(self.barInput, self.x, self.y, self.width, self.height, tocolor(unpack(self.bgBarColor)), self.postGUI) -- unselectedBar
-        dxDrawSVG(self.barInput, self.x, self.y, barValue, self.height, tocolor(unpack(barSelectedColor)), self.postGUI) -- selectedBar
-        dxDrawSVG(self.circle, self.circlePos - (self.circleScale/2), circleY, self.circleScale, self.circleScale, tocolor(unpack(self.circleColor)), self.postGUI) -- circle
+        dxDrawSVG(self.barInput, self.x, self.y, self.width, self.height, tocolor(unpack(self.bgBarColor)), self.postGUI) -- background bar
+        dxDrawSVG(self.barInput, self.x, self.y, barValue, self.height, tocolor(unpack(barSelectedColor)), self.postGUI) -- bar
+        -- dxDrawSVG(self.circle, (self.circlePos - (self.indicatorScale/2)), self.circleY, self.indicatorScale, self.indicatorScale, ((self.borderColor ~= self.indicatorColor) and tocolor(unpack(self.borderColor)) or tocolor(unpack(self.indicatorColor))), self.postGUI) -- indicator border
+        dxDrawSVG(self.circle, self.circlePos - (self.indicatorScale/2), self.circleY, self.indicatorScale, self.indicatorScale, tocolor(unpack(self.borderColor)), self.postGUI)
+        
+        if (self.sizeStroke and self.sizeStroke ~= 0) then
+            dxDrawSVG(self.circle, self.circlePos - (self.indicatorScale/2) + (self.sizeStroke/2), self.circleY + (self.sizeStroke/2), self.indicatorScale - self.sizeStroke, self.indicatorScale - self.sizeStroke, tocolor(unpack(self.indicatorColor)), self.postGUI)
+        end
 
         if (getKeyState('mouse1')) then
-            if (isCursorOnElement(self.circlePos - (self.circleScale/2), circleY, self.circleScale, self.circleScale)) then
+            if (isCursorOnElement(self.circlePos - (self.indicatorScale/2), self.circleY, self.indicatorScale, self.indicatorScale)) then
                 self.scrolling = true
+
                 if (self.endedScrolling) then
                     self.endedScrolling = false
                 end
@@ -199,19 +211,19 @@ function clickSliderBar(button, state)
             local cursorX = mx * screenW
 
             if (inputHover.smoothScroll) then
-                inputHover.scrollOffset = floor(((inputHover.circlePos - inputHover.x) / inputHover.width) * 100, 0, 100)
                 local newCirclePos = clamp(cursorX, inputHover.x, (inputHover.x + inputHover.width))
+                inputHover.scrollOffset = floor(clamp(((newCirclePos - inputHover.x) / inputHover.width) * 100, inputHover.minValue, inputHover.maxValue))
 
                 typeProgress = 'in_progress'
                 tickSmooth = getTickCount()
                 posI, posF = inputHover.circlePos, newCirclePos
             else
                 inputHover.circlePos = clamp(cursorX, inputHover.x, (inputHover.x + inputHover.width))
-                inputHover.scrollOffset = floor(((inputHover.circlePos - inputHover.x) / inputHover.width) * 100, 0, 100)
+                inputHover.scrollOffset = floor(clamp(((inputHover.circlePos - inputHover.x) / inputHover.width) * 100, inputHover.minValue, inputHover.maxValue))
             end
 
-            if (inputHover.scroll_event) then
-                inputHover.scroll_event(inputHover.scrollOffset)
+            if (inputHover.scrollEnd_event) then
+                inputHover.scrollEnd_event(inputHover.scrollOffset)
             end
         end
     end
@@ -229,11 +241,17 @@ function keySliderBar(button, press)
         if (button == 'mouse_wheel_up' and inputHover.scrollOffset < inputHover.maxValue) then
             inputHover.scrollOffset = inputHover.scrollOffset + 1
             inputHover:setScrollOffset(inputHover.scrollOffset)
-            inputHover.scroll_event(inputHover.scrollOffset)
+
+            if (inputHover.scroll_event) then
+                inputHover.scroll_event(inputHover.scrollOffset)
+            end
         elseif (button == 'mouse_wheel_down' and inputHover.scrollOffset > inputHover.minValue) then
             inputHover.scrollOffset = inputHover.scrollOffset - 1
             inputHover:setScrollOffset(inputHover.scrollOffset)
-            inputHover.scroll_event(inputHover.scrollOffset)
+
+            if (inputHover.scroll_event) then
+                inputHover.scroll_event(inputHover.scrollOffset)
+            end
         end
     end
 end
@@ -274,23 +292,18 @@ function scrollInput:setScrollOffset(value)
         warn("Error in argument #2. Defina a value.")
     end
 
-    if (value < 0) then
-        value = 0
-    end
-    if (value > 100) then
-        value = 100
-    end
+    value = clamp(value, self.minValue, self.maxValue)
 
     if (self.smoothScroll) then
         self.scrollOffset = value
-        local newCirclePos = self.x + ((self.width / 100) * self.scrollOffset)
-        
+        local newCirclePos = self.x + ((self.width / self.maxValue) * self.scrollOffset)
+
         typeProgress = 'in_progress'
         tickSmooth = getTickCount()
         posI, posF = self.circlePos, newCirclePos
     else
         self.scrollOffset = value
-        self.circlePos = self.x + ((self.width / 100) * self.scrollOffset)
+        self.circlePos = self.x + ((self.width / self.maxValue) * self.scrollOffset)
     end
 end
 
@@ -316,9 +329,11 @@ local changeableProperties = {
     ['bgBarColor'] = true,
     ['barColor'] = true,
     ['barColorHover'] = true,
-    ['circleColor'] = true,
+    ['indicatorColor'] = true,
+    ['borderColor'] = true,
+    ['animationIndicator'] = true,
     -- ['strokeCircle'] = true,
-    -- ['strokeCircleColor'] = true,
+    -- ['strokeindicatorColor'] = true,
     ['postGUI'] = true,
 }
 
@@ -329,7 +344,7 @@ local changeableProperties = {
 ---@return boolean
 function scrollInput:setProperty(property, value)
     if (not self) then
-        warn("No elements were found.") 
+        warn("No elements were found.")
     end
 
     if (not property or (type(property) ~= 'string')) then
@@ -338,7 +353,7 @@ function scrollInput:setProperty(property, value)
     end
 
     for propertyIndex, active in pairs(changeableProperties) do
-        if (propertyIndex == property) then
+        if (propertyIndex == property and active) then
             self[propertyIndex] = value
             break
         end
@@ -350,7 +365,7 @@ function clamp(number, min, max)
 	if (number < min) then
 		return min
 	elseif (number > max) then
-		return max 
+		return max
 	end
 	return number
 end
